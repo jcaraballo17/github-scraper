@@ -34,3 +34,4 @@ nosetests.xml
 # PyCharm
 .idea
 /venv/
+/src/github_scraper/settings/config.json

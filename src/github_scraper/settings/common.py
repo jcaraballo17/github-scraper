@@ -9,28 +9,33 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import json
+import sys
 from pathlib import Path
 
+from typing import Dict, Any, TextIO, List, Union
+
+# Define Config type for the configuration pulled from `config.json`
+Config = Dict[str, Any]
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
+# "Secret" configuration dictionary
+config: Config = {}
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '+t=7@g%yk4sa31t--qphl2gpf%8)plbd1+fezy8g^d3u)47x_+'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+# Load configuration file
+try:
+    data_file: TextIO
+    with open(BASE_DIR / 'settings' / 'config.json') as data_file:
+        config = json.load(data_file)
+except IOError:
+    sys.exit('You need to setup the config data file (see the `config_template.json` file.)')
 
 
 # Application definition
 
-INSTALLED_APPS = [
+INSTALLED_APPS: List[str] = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-MIDDLEWARE = [
+MIDDLEWARE: List[str] = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -49,9 +54,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'github_scraper.urls'
+ROOT_URLCONF: str = 'github_scraper.urls'
 
-TEMPLATES = [
+TEMPLATES: List[Dict[str, Any]] = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
@@ -67,24 +72,29 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'github_scraper.wsgi.application'
+WSGI_APPLICATION: str = 'github_scraper.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASES: Dict[str, Dict[str, Union[str, int, Dict, List]]] = {}
+for database in config.get('databases'):
+    DATABASES[database.get('connection_name')] = {
+        'NAME': database.get('database_name'),
+        'ENGINE': database.get('engine'),
+        'USER': database.get('user', ''),
+        'PASSWORD': database.get('password', ''),
+        'HOST': database.get('host', ''),
+        'PORT': database.get('port', ''),
+        'OPTIONS': database.get('options', {})
     }
-}
 
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS: List[Dict[str, str]] = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
@@ -103,18 +113,20 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE: str = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE: str = 'UTC'
 
-USE_I18N = True
+USE_I18N: bool = True
 
-USE_L10N = True
+USE_L10N: bool = True
 
-USE_TZ = True
+USE_TZ: bool = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+static_config: Dict = config.get('static', {})
+STATIC_ROOT: str = static_config.get('root', '')
+STATIC_URL: str = static_config.get('url', '/static/')
