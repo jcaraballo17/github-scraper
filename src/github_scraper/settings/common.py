@@ -34,7 +34,6 @@ except IOError:
 
 
 # Application definition
-
 INSTALLED_APPS: List[str] = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +42,14 @@ INSTALLED_APPS: List[str] = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+# Third party apps
+INSTALLED_APPS.extend([])
+
+# Project defined apps
+INSTALLED_APPS.extend([
+    'github_data.apps.GithubDataConfig',
+])
 
 MIDDLEWARE: List[str] = [
     'django.middleware.security.SecurityMiddleware',
