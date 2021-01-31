@@ -1,0 +1,20 @@
+{
+  "secret_key": "{string: secret key goes here}",
+  "debug_mode": "{boolean: flag to activate debug mode}",
+  "hostnames": "{list[string]: server domain names}",
+  "static": {
+    "url": "{string: static files url}",
+    "root": "{string: static files root path}"
+  },
+  "databases": [
+    {
+      "connection_name": "default",
+      "database_name": "{string: default database name}",
+      "engine": "{string: default database engine} (e.g. django.db.backends.postgresql)",
+      "user": "{string: default database username}",
+      "password": "{string: default database password}",
+      "host": "{string: default database server name or ip} (e.g. localhost)",
+      "port": "{int: default database connection port} (e.g. 5432)"
+    }
+  ]
+}
