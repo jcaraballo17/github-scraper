@@ -44,7 +44,10 @@ INSTALLED_APPS: List[str] = [
 ]
 
 # Third party apps
-INSTALLED_APPS.extend([])
+INSTALLED_APPS.extend([
+    'rest_framework',
+    'ghapi'
+])
 
 # Project defined apps
 INSTALLED_APPS.extend([
@@ -116,6 +119,28 @@ AUTH_PASSWORD_VALIDATORS: List[Dict[str, str]] = [
     },
 ]
 
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+        },
+    },
+    'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -137,3 +162,6 @@ USE_TZ: bool = True
 static_config: Dict = config.get('static', {})
 STATIC_ROOT: str = static_config.get('root', '')
 STATIC_URL: str = static_config.get('url', '/static/')
+
+# GhApi
+GITHUB_TOKEN: str = config.get('github_oauth_token')
