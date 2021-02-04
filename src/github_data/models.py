@@ -21,7 +21,7 @@ class GithubRepository(models.Model):
     Model representing a GitHub Repository.
     """
     id = models.IntegerField(primary_key=True, verbose_name='github repository id', db_column='github_id')
-    owner = models.ForeignKey(GithubUser, on_delete=models.CASCADE, related_name='repos')
+    owner = models.ForeignKey(GithubUser, on_delete=models.CASCADE, related_name='repositories')
     full_name = models.CharField(max_length=140, unique=True)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
