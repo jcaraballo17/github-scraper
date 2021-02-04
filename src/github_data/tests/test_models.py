@@ -4,16 +4,20 @@ from github_data.models import GithubUser, GithubRepository
 
 
 class TestGithubUser(TestCase):
+    def setUp(self):
+        self.user: GithubUser = GithubUser(id=777, login='realuser', url='https://api.github.com/users/realuser')
+
     def test_string_representation(self):
-        user = GithubUser(id=777, login='isthisarealuser', url='https://api.github.com/users/isthisarealuser')
-        self.assertEqual(str(user), user.login)
+        self.assertEqual(str(self.user), self.user.login)
 
 
 class TestGithubRepository(TestCase):
-    def test_string_representation(self):
-        user = GithubUser(id=777, login='isthisarealuser', url='https://api.github.com/users/isthisarealuser')
-        repository = GithubRepository(
-            id=888, owner=user, full_name='isthisarealuser/head-scratcher', name='head-scratcher',
-            description='', url='https://api.github.com/users/isthisarealuser/head-scratcher'
+    def setUp(self):
+        self.user: GithubUser = GithubUser(id=777, login='realuser', url='https://api.github.com/users/realuser')
+        self.repository: GithubRepository = GithubRepository(
+            id=888, owner=self.user, full_name='realuser/head-scratcher', name='head-scratcher',
+            description='', url='https://api.github.com/users/realuser/head-scratcher'
         )
-        self.assertEqual(str(repository), f'{user.login}/{repository.name}')
+
+    def test_string_representation(self):
+        self.assertEqual(str(self.repository), f'{self.user.login}/{self.repository.name}')

@@ -24,7 +24,7 @@ class GithubRepository(models.Model):
     owner = models.ForeignKey(GithubUser, on_delete=models.CASCADE, related_name='repos')
     full_name = models.CharField(max_length=140, unique=True)
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)
     url = models.URLField()
 
     class Meta:
