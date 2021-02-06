@@ -1,7 +1,8 @@
 import logging
 import math
 import itertools
-from typing import List, Optional, Tuple
+from logging import Logger
+from typing import List, Optional, Tuple, Final
 from urllib.error import HTTPError
 
 from ghapi.core import GhApi
@@ -13,12 +14,12 @@ from github_data.serializers import GithubUserSerializer, GithubRepositorySerial
 
 
 # Get a logger to log things
-logger = logging.getLogger(__name__)
+logger: Logger = logging.getLogger(__name__)
 
 
 class Scraper:
-    max_page_size = 100
-    min_page_size = 1
+    min_page_size: Final[int] = 1
+    max_page_size: Final[int] = 100
 
     def __init__(self, *, token: Optional[str] = None, users_page_size: int = 50, repositories_page_size: int = 30):
         """
