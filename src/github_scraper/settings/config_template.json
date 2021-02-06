@@ -2,6 +2,7 @@
   "secret_key": "{string: secret key goes here}",
   "debug_mode": "{boolean: flag to activate debug mode}",
   "hostnames": "{list[string]: server domain names}",
+  "github_oauth_token": "{string: the github OAuth token to be used by the scraping tool}",
   "static": {
     "url": "{string: static files url}",
     "root": "{string: static files root path}"
