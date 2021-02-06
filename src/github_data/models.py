@@ -11,6 +11,7 @@ class GithubUser(models.Model):
 
     class Meta:
         db_table = 'github_user'
+        ordering = ['id']
 
     def __str__(self):
         return f'{self.login}'
@@ -30,6 +31,7 @@ class GithubRepository(models.Model):
     class Meta:
         db_table = 'github_repository'
         verbose_name_plural = 'github repositories'
+        ordering = ['id']
 
     def __str__(self):
         return f'{self.full_name}'
