@@ -7,13 +7,16 @@ from github_data.models import GithubUser, GithubRepository
 from github_data.scraper_tool import Scraper
 
 
-class TestScraperPagination(TestCase):
-    def setUp(self):
+class ScraperPaginationTestCase(TestCase):
+    """
+    Tests for the User and Repository pagination methods of the Scraper tool.
+    """
+    def setUp(self) -> None:
         self.page_size_5_scraper: Scraper = Scraper(users_page_size=5, repositories_page_size=5)
         self.page_size_20_scraper: Scraper = Scraper(users_page_size=20, repositories_page_size=20)
         self.bounded_page_size_scraper: Scraper = Scraper(users_page_size=240, repositories_page_size=-50)
 
-    def test_calculate_user_paging(self):
+    def test_calculate_user_paging(self) -> None:
         # response is ({number of pages}, {remaining users}, {page size})
         # normal case with no remaining users
         self.assertTupleEqual(self.page_size_5_scraper.calculate_user_paging(25), (5, 0, 5))
@@ -24,7 +27,7 @@ class TestScraperPagination(TestCase):
         # all users
         self.assertTupleEqual(self.page_size_20_scraper.calculate_user_paging(0), (0, 0, 20))
 
-    def test_calculate_repository_paging(self):
+    def test_calculate_repository_paging(self) -> None:
         # response is ({number of pages}, {page size})
         # normal case with no extra page
         self.assertTupleEqual(self.page_size_5_scraper.calculate_repository_paging(40), (8, 5))
@@ -37,7 +40,7 @@ class TestScraperPagination(TestCase):
         # requesting an invalid number of repositories (less than 0)
         self.assertTupleEqual(self.page_size_20_scraper.calculate_repository_paging(-1), (0, 20))
 
-    def test_page_size_bounds(self):
+    def test_page_size_bounds(self) -> None:
         negative_paged_scraper: Scraper = Scraper(users_page_size=-15, repositories_page_size=-10)
         big_scraper: Scraper = Scraper(users_page_size=150, repositories_page_size=5000)
 
@@ -51,11 +54,14 @@ class TestScraperPagination(TestCase):
 
 
 class TestScraper(TestCase):
-    def setUp(self):
+    """
+    Tests for the scraping methods of the Scraper tool.
+    """
+    def setUp(self) -> None:
         self.page_size_10_scraper: Scraper = Scraper(users_page_size=1, repositories_page_size=1)
         self.page_size_3_scraper: Scraper = Scraper(users_page_size=3, repositories_page_size=3)
 
-    def test_scraping_individual_users(self):
+    def test_scraping_individual_users(self) -> None:
         users: List[str] = ['jcaraballo17', 'Maurier']
 
         try:
@@ -69,7 +75,7 @@ class TestScraper(TestCase):
         self.assertEqual(GithubRepository.objects.filter(owner__login='jcaraballo17').count(), 1)
         self.assertEqual(GithubRepository.objects.filter(owner__login='Maurier').count(), 1)
 
-    def test_scraping_2_users_2_repositories(self):
+    def test_scraping_2_users_2_repositories(self) -> None:
         starting_id: int = 4700504  # 4700505 has 2 repositories, 4700506 has 0 repositories
 
         try:
@@ -82,7 +88,7 @@ class TestScraper(TestCase):
         self.assertEqual(GithubRepository.objects.filter(owner_id=4700505).count(), 2)
         self.assertEqual(GithubRepository.objects.filter(owner_id=4700506).count(), 0)
 
-    def test_scraping_3_users_all_repositories(self):
+    def test_scraping_3_users_all_repositories(self) -> None:
         starting_id: int = 4721939
         # 4721940 sreeder 8 repositories
         # 4721941 scatterfull 0 repositories
@@ -100,7 +106,7 @@ class TestScraper(TestCase):
         self.assertEqual(GithubRepository.objects.filter(owner_id=4721941).count(), 0)
         self.assertEqual(GithubRepository.objects.filter(owner_id=4721942).count(), 7)
 
-    def test_scraping_1_existing_user_2_repositories(self):
+    def test_scraping_1_existing_user_2_repositories(self) -> None:
         GithubUser.objects.create(id=4700505, login='jcaraballo17', url="https://api.github.com/users/jcaraballo17")
         try:
             self.page_size_10_scraper.scrape_individual_users(['jcaraballo17'], number_of_repositories=2)
