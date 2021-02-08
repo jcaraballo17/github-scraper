@@ -1,17 +1,24 @@
 language: python
 
 python:
-  - "3.6"
-  - "3.7"
   - "3.8"
-  - "3.9"
 
 env:
   global:
     - DJANGO_SETTINGS_MODULE="github_scraper.settings.travis"
+    - PYTHONPATH="/home/travis/build/jcaraballo17/github_scraper/src"
+    - PIP_USE_MIRRORS=true
+    - BUILD_ON_TRAVIS=true
 
 install:
   - pip install -r requirements.txt
+
+services:
+  - postgresql
+
+before_script:
+  - psql -c 'create database travis_ci_db;' -U postgres
+  - python manage.py migrate
 
 script:
   - pytest
