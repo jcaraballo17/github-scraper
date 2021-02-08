@@ -4,10 +4,10 @@ SECRET_KEY: str = 'thisisanotsosecretkeyfortravis'
 DEBUG: bool = False
 DATABASES = {
     'default': {
-        'name': 'travis_ci_db',
-        'engine': 'django.db.backends.postgresql',
-        'user': 'travis',
-        'password': '',
-        'host': 'localhost',
+        'NAME': 'travis_ci_db',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'travis',
+        'PASSWORD': '',
+        'HOST': 'localhost',
     }
 }
