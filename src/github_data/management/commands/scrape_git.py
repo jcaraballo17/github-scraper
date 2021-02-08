@@ -41,11 +41,11 @@ class Command(BaseCommand):
 
         # if there are individual users, get em.
         if len(options.get('user')):
-            logger.info('scraping individual users')
+            logger.info('- scraping individual users')
             self.handle_individual_users(options.get('user'))
             return
 
-        logger.info('scraping a range of users')
+        logger.info('- scraping a range of users')
         self.handle_users_range()
 
     def handle_individual_users(self, user_list: List[str], scraper: Scraper = None) -> None:
@@ -58,13 +58,15 @@ class Command(BaseCommand):
             scraper.scrape_individual_users(user_list, **kwargs)
         except RateLimitExceededError as limit_error:
             if self.retry:
-                logger.warning(f'Github rate limit exceeded! Retrying in {limit_error.limit_reset_seconds} seconds')
+                logger.warning(f'--- github rate limit exceeded! '
+                               f'retrying automatically in {limit_error.limit_reset_seconds} seconds')
+
                 time.sleep(limit_error.limit_reset_seconds)
                 self.handle_individual_users(user_list, scraper=scraper)
                 return
             else:
-                logger.warning('Github rate limit was exceeded! Try again later.')
-        logger.info(f'users added: {scraper.users_added}, repositories added: {scraper.repositories_added}')
+                logger.error('--- github rate limit was exceeded! scraping stopped.')
+        logger.info(f'- users added: {scraper.users_added}, repositories added: {scraper.repositories_added}')
 
     def handle_users_range(self, scraper: Scraper = None):
         kwargs: Dict[str, Any] = {
@@ -79,18 +81,19 @@ class Command(BaseCommand):
             scraper.scrape_users(**kwargs)
         except RateLimitExceededError as limit_error:
             if self.retry:
-                logger.warning(f'Github rate limit exceeded! '
-                               f'Continuing in {limit_error.limit_reset_seconds} seconds')
-                logger.info(f'rate limit reached at id {limit_error.last_id} '
+                logger.warning(f'--- github rate limit exceeded! '
+                               f'continuing automatically in {limit_error.limit_reset_seconds} seconds')
+                logger.info(f'--- rate limit reached at id {limit_error.last_id} '
                             f'with {scraper.users_processed} users processed.')
+
                 time.sleep(limit_error.limit_reset_seconds)
-                logger.info('rate limit reset time elapsed. picking up where we left.')
+                logger.info('--- rate limit reset time elapsed. picking up where we left.')
 
                 self.since = limit_error.last_id
                 self.number_of_users = self.number_of_users - scraper.users_processed
-                logger.info(f'scraping remaining {self.number_of_users} users starting at id {self.since}')
+                logger.info(f'- scraping remaining {self.number_of_users} users starting at id {self.since}')
                 self.handle_users_range(scraper=scraper)
                 return
             else:
-                logger.warning('Github rate limit was exceeded! Try again later.')
+                logger.error('--- github rate limit was exceeded! scraping stopped.')
         logger.info(f'users added: {scraper.users_added}, repositories added: {scraper.repositories_added}')

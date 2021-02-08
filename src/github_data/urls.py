@@ -1,7 +1,8 @@
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from github_data.views import api_root, user_list, user_detail, repository_list, repository_detail, user_repository_list
+from github_data.views import api_root, user_list, user_detail, \
+    repository_list, repository_detail, user_repository_list
 
 urlpatterns = format_suffix_patterns([
     path('', api_root, name='api-root'),

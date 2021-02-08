@@ -44,12 +44,12 @@ class ScraperPaginationTestCase(TestCase):
         big_scraper: Scraper = Scraper(users_page_size=150, repositories_page_size=5000)
 
         # the negative page sizes default to the minimum
-        self.assertEqual(negative_paged_scraper.users_page_size, Scraper.min_page_size)
-        self.assertEqual(negative_paged_scraper.repositories_page_size, Scraper.min_page_size)
+        self.assertEqual(negative_paged_scraper.users_page_size, Scraper.MIN_PAGE_SIZE)
+        self.assertEqual(negative_paged_scraper.repositories_page_size, Scraper.MIN_PAGE_SIZE)
 
         # the page sizes that are greater than the max value default to the maximum
-        self.assertEqual(big_scraper.users_page_size, Scraper.max_page_size)
-        self.assertEqual(big_scraper.users_page_size, Scraper.max_page_size)
+        self.assertEqual(big_scraper.users_page_size, Scraper.MAX_PAGE_SIZE)
+        self.assertEqual(big_scraper.users_page_size, Scraper.MAX_PAGE_SIZE)
 
 
 class TestScraper(TestCase):
