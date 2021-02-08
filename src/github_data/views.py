@@ -32,7 +32,9 @@ class GithubUserViewSet(viewsets.ReadOnlyModelViewSet):
         :param kwargs: keyword arguments
         :return: A response with a serialized queryset of Github Users.
         """
-        if since := request.query_params.get('since'):
+        since = request.query_params.get('since')
+
+        if since:
             self.queryset = self.get_queryset().filter(pk__gt=since)
         return super().list(request, *args, **kwargs)
 
