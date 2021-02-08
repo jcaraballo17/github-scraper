@@ -34,7 +34,7 @@ class GithubUserViewSet(viewsets.ReadOnlyModelViewSet):
         """
         if since := request.query_params.get('since'):
             self.queryset = self.get_queryset().filter(pk__gt=since)
-        return super(GithubUserViewSet, self).list(request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
 
 
 class GithubRepositoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -46,6 +46,13 @@ class GithubRepositoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False)
     def user_repositories(self, request, *args, **kwargs):
+        """
+        Custom action to list a User's repositories.
+        :param request: Request object with all the request data.
+        :param args: arguments
+        :param kwargs: keyword arguments
+        :return: A response with a serialized queryset of a User's Github Repositories. 404 if the user is not found.
+        """
         owner_username: str = kwargs.get('login')
         user: GithubUser = get_object_or_404(GithubUser.objects.all(), login=owner_username)
         queryset: QuerySet = user.repositories.all()
@@ -69,7 +76,7 @@ class GithubRepositoryViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 @api_view(['GET'])
-def api_root(request, format=None) -> Response:
+def api_root(request, format: str =None) -> Response:
     """
     Github Scraped data API
     """
