@@ -21,11 +21,16 @@ class Command(BaseCommand):
     retry: bool = False
 
     def add_arguments(self, parser):
-        parser.add_argument('user', nargs='*', type=str)
-        parser.add_argument('--since', nargs='?', type=int)
-        parser.add_argument('--users', nargs='?', type=int)
-        parser.add_argument('--repositories', nargs='?', type=int)
-        parser.add_argument('--retry', action='store_true')
+        parser.add_argument('user', nargs='*', type=str,
+                            help='One or more usernames to scrape from the GitHub API.')
+        parser.add_argument('--since', nargs='?', type=int, metavar='id',
+                            help='A starting ID to scrape a range consecutive of users,')
+        parser.add_argument('--users', nargs='?', type=int, metavar='number of users',
+                            help='The number of users to scrape.')
+        parser.add_argument('--repositories', nargs='?', type=int, metavar='number of repositories',
+                            help='The number of repositories per users to scrape.')
+        parser.add_argument('--retry', action='store_true',
+                            help='If rate limit is reached, wait and continue scraping after the reset time has passed.')
 
     def handle(self, *args, **options):
         # get all arguments to pass on to the scraper
