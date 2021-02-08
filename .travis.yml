@@ -5,6 +5,11 @@ python:
   - "3.7"
   - "3.8"
   - "3.9"
+
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE="github_scraper.settings.travis"
+
 install:
   - pip install -r requirements.txt
 
