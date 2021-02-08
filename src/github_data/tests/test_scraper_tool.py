@@ -1,8 +1,7 @@
 from typing import List
 from django.test import TestCase
 
-from fastcore.net import HTTP4xxClientError
-
+from github_data.exceptions import RateLimitExceededError
 from github_data.models import GithubUser, GithubRepository
 from github_data.scraper_tool import Scraper
 
@@ -66,27 +65,30 @@ class TestScraper(TestCase):
 
         try:
             self.page_size_10_scraper.scrape_individual_users(users, number_of_repositories=1)
-        except HTTP4xxClientError:
+        except RateLimitExceededError:
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertTrue(GithubUser.objects.filter(login='jcaraballo17').exists())
         self.assertTrue(GithubUser.objects.filter(login='Maurier').exists())
-
         self.assertEqual(GithubRepository.objects.filter(owner__login='jcaraballo17').count(), 1)
         self.assertEqual(GithubRepository.objects.filter(owner__login='Maurier').count(), 1)
+        self.assertEqual(self.page_size_10_scraper.users_processed, 2)
+        self.assertEqual(self.page_size_10_scraper.repositories_processed, 2)
 
     def test_scraping_2_users_2_repositories(self) -> None:
         starting_id: int = 4700504  # 4700505 has 2 repositories, 4700506 has 0 repositories
 
         try:
             self.page_size_3_scraper.scrape_users(since=starting_id, number_of_users=2, number_of_repositories=2)
-        except HTTP4xxClientError:
+        except RateLimitExceededError:
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertTrue(GithubUser.objects.filter(id=4700505).exists())
         self.assertTrue(GithubUser.objects.filter(id=4700506).exists())
         self.assertEqual(GithubRepository.objects.filter(owner_id=4700505).count(), 2)
         self.assertEqual(GithubRepository.objects.filter(owner_id=4700506).count(), 0)
+        self.assertEqual(self.page_size_3_scraper.users_processed, 2)
+        self.assertEqual(self.page_size_3_scraper.repositories_processed, 2)
 
     def test_scraping_3_users_all_repositories(self) -> None:
         starting_id: int = 4721939
@@ -96,7 +98,7 @@ class TestScraper(TestCase):
 
         try:
             self.page_size_3_scraper.scrape_users(since=starting_id, number_of_users=3, number_of_repositories=0)
-        except HTTP4xxClientError:
+        except RateLimitExceededError:
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertTrue(GithubUser.objects.filter(id=4721940).exists())
@@ -105,11 +107,16 @@ class TestScraper(TestCase):
         self.assertEqual(GithubRepository.objects.filter(owner_id=4721940).count(), 8)
         self.assertEqual(GithubRepository.objects.filter(owner_id=4721941).count(), 0)
         self.assertEqual(GithubRepository.objects.filter(owner_id=4721942).count(), 7)
+        self.assertEqual(self.page_size_3_scraper.users_processed, 3)
+        self.assertEqual(self.page_size_3_scraper.repositories_processed, 15)
 
     def test_scraping_1_existing_user_2_repositories(self) -> None:
         GithubUser.objects.create(id=4700505, login='jcaraballo17', url="https://api.github.com/users/jcaraballo17")
         try:
             self.page_size_10_scraper.scrape_individual_users(['jcaraballo17'], number_of_repositories=2)
-        except HTTP4xxClientError:
+        except RateLimitExceededError:
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
         self.assertEqual(GithubRepository.objects.filter(owner__login='jcaraballo17').count(), 2)
+        self.assertEqual(self.page_size_10_scraper.users_added, 0)
+        self.assertEqual(self.page_size_10_scraper.users_processed, 1)
+        self.assertEqual(self.page_size_10_scraper.repositories_processed, 2)

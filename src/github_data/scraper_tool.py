@@ -3,12 +3,13 @@ import math
 import itertools
 from logging import Logger
 from typing import List, Optional, Tuple, Final
-from urllib.error import HTTPError
 
+from fastcore.net import HTTP4xxClientError
 from ghapi.core import GhApi
 from fastcore.foundation import L as fastlist
 from rest_framework.serializers import ModelSerializer
 
+from github_data.exceptions import RateLimitExceededError
 from github_data.models import GithubUser, GithubRepository
 from github_data.serializers import GithubUserSerializer, GithubRepositorySerializer
 
@@ -20,8 +21,14 @@ logger: Logger = logging.getLogger(__name__)
 class Scraper:
     min_page_size: Final[int] = 1
     max_page_size: Final[int] = 100
+    default_user_page_size: Final[int] = 50
+    default_repository_page_size: Final[int] = 30
+    default_number_of_repositories: Final[int] = 0
+    default_number_of_users: Final[int] = 0
 
-    def __init__(self, *, token: Optional[str] = None, users_page_size: int = 50, repositories_page_size: int = 30):
+    def __init__(self, *, token: Optional[str] = None,
+                 users_page_size: int = default_user_page_size,
+                 repositories_page_size: int = default_repository_page_size):
         """
         Initializes a GitHub Scraper with a determined page size for users and repositories.
         :param token: Github OAuth token to get a better rate limit
@@ -29,15 +36,17 @@ class Scraper:
         :param repositories_page_size: The amount of repositories each github repositories api call will fetch. max: 100
         """
         self.api: GhApi = GhApi(token=token)
+        self.repositories_processed: int = 0
+        self.users_processed: int = 0
         self.repositories_added: int = 0
         self.users_added: int = 0
-        # Bound the page sizes to be between the minimum and the maximum values
+        # Bound the page sizes to the minimum and the maximum values
         self.users_page_size: int = max(min(self.max_page_size, users_page_size), self.min_page_size)
         self.repositories_page_size: int = max(min(self.max_page_size, repositories_page_size), self.min_page_size)
-
         logger.debug(f'scrapper instance created with token: {token}.')
 
-    def scrape_individual_users(self, usernames: List[str], *, number_of_repositories: int = 0) -> None:
+    def scrape_individual_users(self, usernames: List[str], *,
+                                number_of_repositories: int = default_number_of_repositories) -> None:
         """
         Scrapes a list of users and their repositories from the GitHub API.
         :param usernames: The list of usernames to scrape
@@ -46,16 +55,33 @@ class Scraper:
         """
 
         # bound the number of users and repositories, set to the default 0 (all) if it's less than that.
-        number_of_repositories = max(number_of_repositories, 0)
+        number_of_repositories = max(number_of_repositories, self.default_number_of_repositories)
 
         for username in usernames:
             logger.info(f'scraping user {username}')
-            user_data: fastlist = self.api.users.get_by_username(username)
+            try:
+                user_data: fastlist = self.api.users.get_by_username(username)
+            except HTTP4xxClientError as error:
+                # Raise rate limit exceeded error.
+                raise RateLimitExceededError(
+                    error.url, error.code, 'Rate Limit Exceeded',
+                    error.headers, error.fp
+                )
 
             self.users_added += create_user(user_data)
-            self.scrape_user_repositories(username, number_of_repositories=number_of_repositories)
+            self.users_processed += 1
+            try:
+                self.scrape_user_repositories(username, number_of_repositories=number_of_repositories)
+            except HTTP4xxClientError as error:
+                # Raise rate limit exceeded error.
+                raise RateLimitExceededError(
+                    error.url, error.code, 'Rate Limit Exceeded',
+                    error.headers, error.fp
+                )
 
-    def scrape_users(self, *, since: int = 1, number_of_users: int = 0, number_of_repositories: int = 0) -> None:
+    def scrape_users(self, *, since: int = 0,
+                     number_of_users: int = default_number_of_users,
+                     number_of_repositories: int = default_number_of_repositories) -> None:
         """
         Scrapes a determined quantity of users and their repositories from the GitHub API.
         :param since: The starting ID from where the number of users specified will be fetched
@@ -67,15 +93,22 @@ class Scraper:
         """
 
         # bound the number of users and repositories, set to the default 0 (all) if it's less than that.
-        number_of_users = max(number_of_users, 0)
-        number_of_repositories = max(number_of_repositories, 0)
+        number_of_users = max(number_of_users, self.default_number_of_users)
+        number_of_repositories = max(number_of_repositories, self.default_number_of_repositories)
         logger.info(f'scraping {number_of_users} users and {number_of_repositories} repos starting at id {since}')
+
         pages, remaining_count, page_size = self.calculate_user_paging(number_of_users)
         logger.debug(f'starting with {pages} batches of {page_size} users and one batch of {remaining_count} users')
         parse_remaining: bool = True
 
         for page_count in itertools.count(1):
-            user_list: fastlist = self.api.users.list(since, per_page=page_size)
+            try:
+                user_list: fastlist = self.api.users.list(since, per_page=page_size)
+            except HTTP4xxClientError as error:
+                raise RateLimitExceededError(
+                    error.url, error.code, 'Rate Limit Exceeded',
+                    error.headers, error.fp, last_id=since
+                )
             logger.debug(f'fetched {len(user_list)} users in batch {page_count}')
             since: int = self.parse_users_list(user_list, number_of_repositories)
 
@@ -99,7 +132,15 @@ class Scraper:
         for user in users:
             logger.info(f'scraping user {user.login}')
             self.users_added += create_user(user)
-            self.scrape_user_repositories(user.login, number_of_repositories=number_of_repositories)
+            self.users_processed += 1
+
+            try:
+                self.scrape_user_repositories(user.login, number_of_repositories=number_of_repositories)
+            except HTTP4xxClientError as error:
+                raise RateLimitExceededError(
+                    error.url, error.code, 'Rate Limit Exceeded',
+                    error.headers, error.fp, last_id=last_user_id
+                )
             last_user_id = user.id
         return last_user_id
 
@@ -131,6 +172,7 @@ class Scraper:
         for repository in repositories:
             logger.info(f'scraping repository {repository.full_name}')
             self.repositories_added += create_repository(repository)
+            self.repositories_processed += 1
 
     def calculate_user_paging(self, number_of_users: int) -> Tuple[int, int, int]:
         """
@@ -176,7 +218,7 @@ class Scraper:
         # if the number of repositories has any remainder after dividing by the page size
         # and the user has a bigger total number of repositories, the pagination will give you a whole extra page
         # with more repositories than what was specified in `number_of_repositories`.
-        # so.... let's find the common factors of `number_of_repositories` and `self.repositories_page_size`,
+        # so.... let's find the factors of `number_of_repositories`
         # and use the closest one to `self.repositories_page_size` as the page size.
         # i brought this on myself.
 
@@ -194,9 +236,6 @@ class Scraper:
             page_size = number_of_repositories
 
         return pages, page_size
-
-    class RateLimitExceededError(HTTPError):
-        """ Github Rate Limit was exceeded and no more requests can be done for the next hour. """
 
 
 def create_user(user_data: fastlist) -> bool:
