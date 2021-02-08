@@ -61,7 +61,7 @@ class Scraper:
             logger.info(f'- scraping user {username}')
             try:
                 user_data: fastlist = self.api.users.get_by_username(username)
-            except HTTP4xxClientError as error:
+            except HTTP4xxClientError as error:  # pragma: no cover
                 # Raise rate limit exceeded error.
                 raise RateLimitExceededError(
                     error.url, error.code, 'Rate Limit Exceeded',
@@ -72,7 +72,7 @@ class Scraper:
             self.users_processed += 1
             try:
                 self.scrape_user_repositories(username, number_of_repositories=number_of_repositories)
-            except HTTP4xxClientError as error:
+            except HTTP4xxClientError as error:  # pragma: no cover
                 # Raise rate limit exceeded error.
                 raise RateLimitExceededError(
                     error.url, error.code, 'Rate Limit Exceeded',
@@ -104,7 +104,7 @@ class Scraper:
         for page_count in itertools.count(1):
             try:
                 user_list: fastlist = self.api.users.list(since, per_page=page_size)
-            except HTTP4xxClientError as error:
+            except HTTP4xxClientError as error:  # pragma: no cover
                 raise RateLimitExceededError(
                     error.url, error.code, 'Rate Limit Exceeded',
                     error.headers, error.fp, last_id=since
@@ -136,7 +136,7 @@ class Scraper:
 
             try:
                 self.scrape_user_repositories(user.login, number_of_repositories=number_of_repositories)
-            except HTTP4xxClientError as error:
+            except HTTP4xxClientError as error:  # pragma: no cover
                 raise RateLimitExceededError(
                     error.url, error.code, 'Rate Limit Exceeded',
                     error.headers, error.fp, last_id=last_user_id

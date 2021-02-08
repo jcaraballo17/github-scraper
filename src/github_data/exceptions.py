@@ -6,7 +6,7 @@ from urllib.error import HTTPError
 class RateLimitExceededError(HTTPError):
     """ Github Rate Limit was exceeded and no more requests can be done for the next hour. """
 
-    def __init__(self, url, code, msg, hdrs, fp, last_id: int = None):
+    def __init__(self, url, code, msg, hdrs, fp, last_id: int = None):  # pragma: no cover
         super().__init__(url, code, msg, hdrs, fp)
         self.last_id: int = last_id
         limit_reset_header: int = int(hdrs.get('X-RateLimit-Reset'))

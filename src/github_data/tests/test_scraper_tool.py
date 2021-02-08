@@ -65,7 +65,7 @@ class TestScraper(TestCase):
 
         try:
             self.page_size_10_scraper.scrape_individual_users(users, number_of_repositories=1)
-        except RateLimitExceededError:
+        except RateLimitExceededError:  # pragma: no cover
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertTrue(GithubUser.objects.filter(login='jcaraballo17').exists())
@@ -80,7 +80,7 @@ class TestScraper(TestCase):
 
         try:
             self.page_size_3_scraper.scrape_users(since=starting_id, number_of_users=2, number_of_repositories=2)
-        except RateLimitExceededError:
+        except RateLimitExceededError:  # pragma: no cover
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertTrue(GithubUser.objects.filter(id=4700505).exists())
@@ -98,7 +98,7 @@ class TestScraper(TestCase):
 
         try:
             self.page_size_3_scraper.scrape_users(since=starting_id, number_of_users=3, number_of_repositories=0)
-        except RateLimitExceededError:
+        except RateLimitExceededError:  # pragma: no cover
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertTrue(GithubUser.objects.filter(id=4721940).exists())
@@ -114,7 +114,7 @@ class TestScraper(TestCase):
         GithubUser.objects.create(id=4700505, login='jcaraballo17', url="https://api.github.com/users/jcaraballo17")
         try:
             self.page_size_10_scraper.scrape_individual_users(['jcaraballo17'], number_of_repositories=2)
-        except RateLimitExceededError:
+        except RateLimitExceededError:  # pragma: no cover
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
         self.assertEqual(GithubRepository.objects.filter(owner__login='jcaraballo17').count(), 2)
         self.assertEqual(self.page_size_10_scraper.users_added, 0)

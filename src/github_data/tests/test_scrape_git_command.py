@@ -11,7 +11,7 @@ class ScrapeCommandTestCase(TestCase):
         args = ['jcaraballo17', 'Maurier']
         try:
             call_command('scrape_git', *args)
-        except RateLimitExceededError:
+        except RateLimitExceededError:  # pragma: no cover
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertTrue(GithubUser.objects.filter(login='jcaraballo17').exists())
@@ -25,7 +25,7 @@ class ScrapeCommandTestCase(TestCase):
         options = {'repositories': 1}
         try:
             call_command('scrape_git', *args, **options)
-        except RateLimitExceededError:
+        except RateLimitExceededError:  # pragma: no cover
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertTrue(GithubUser.objects.filter(login='jcaraballo17').exists())
@@ -38,7 +38,7 @@ class ScrapeCommandTestCase(TestCase):
 
         try:
             call_command('scrape_git', *args, **options)
-        except RateLimitExceededError:
+        except RateLimitExceededError:  # pragma: no cover
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertEqual(GithubUser.objects.count(), 5)
@@ -51,7 +51,7 @@ class ScrapeCommandTestCase(TestCase):
 
         try:
             call_command('scrape_git', *args, **options)
-        except RateLimitExceededError:
+        except RateLimitExceededError:  # pragma: no cover
             self.skipTest('Unable to complete test: Github rate limit exceeded! Try again later.')
 
         self.assertEqual(GithubUser.objects.count(), 2)

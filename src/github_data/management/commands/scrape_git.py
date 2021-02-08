@@ -56,7 +56,7 @@ class Command(BaseCommand):
         scraper = scraper or Scraper(token=settings.GITHUB_TOKEN)
         try:
             scraper.scrape_individual_users(user_list, **kwargs)
-        except RateLimitExceededError as limit_error:
+        except RateLimitExceededError as limit_error:  # pragma: no cover
             if self.retry:
                 logger.warning(f'--- github rate limit exceeded! '
                                f'retrying automatically in {limit_error.limit_reset_seconds} seconds')
@@ -79,7 +79,7 @@ class Command(BaseCommand):
 
         try:
             scraper.scrape_users(**kwargs)
-        except RateLimitExceededError as limit_error:
+        except RateLimitExceededError as limit_error:  # pragma: no cover
             if self.retry:
                 logger.warning(f'--- github rate limit exceeded! '
                                f'continuing automatically in {limit_error.limit_reset_seconds} seconds')
