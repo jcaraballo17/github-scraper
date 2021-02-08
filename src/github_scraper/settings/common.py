@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import os
 import json
 import sys
 from pathlib import Path
@@ -30,7 +31,8 @@ try:
     with open(BASE_DIR / 'settings' / 'config.json') as data_file:
         config = json.load(data_file)
 except IOError:
-    sys.exit('You need to setup the config data file (see the `config_template.json` file.)')
+    if 'SKIP_CONFIG' not in os.environ:
+        sys.exit('You need to setup the config data file (see the `config_template.json` file.)')
 
 
 # Application definition
@@ -87,9 +89,8 @@ WSGI_APPLICATION: str = 'github_scraper.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
 DATABASES: Dict[str, Dict[str, Union[str, int, Dict, List]]] = {}
-for database in config.get('databases'):
+for database in config.get('databases', []):
     DATABASES[database.get('connection_name')] = {
         'NAME': database.get('database_name'),
         'ENGINE': database.get('engine'),
