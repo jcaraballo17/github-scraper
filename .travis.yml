@@ -12,6 +12,7 @@ env:
 
 install:
   - pip install -r requirements.txt
+  - pip install coveralls
 
 services:
   - postgresql
@@ -22,4 +23,7 @@ before_script:
   - python manage.py migrate
 
 script:
-  - pytest
+  - pytest --cov=github_data/
+
+after_success:
+  - coveralls
