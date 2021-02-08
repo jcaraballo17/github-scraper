@@ -6,7 +6,7 @@ python:
 env:
   global:
     - DJANGO_SETTINGS_MODULE="github_scraper.settings.travis"
-    - PYTHONPATH="/home/travis/build/jcaraballo17/github_scraper/src"
+    - PYTHONPATH="/home/travis/build/jcaraballo17/github-scraper/src"
     - PIP_USE_MIRRORS=true
     - BUILD_ON_TRAVIS=true
 
