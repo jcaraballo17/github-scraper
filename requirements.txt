@@ -6,3 +6,4 @@ ghapi~=0.1.16
 
 pytest~=6.2.2
 pytest-cov~=2.11.1
+pytest-django~=4.1.0
