@@ -2,7 +2,7 @@ import logging
 import math
 import itertools
 from logging import Logger
-from typing import List, Optional, Tuple, Final
+from typing import List, Optional, Tuple
 
 from fastcore.net import HTTP4xxClientError
 from ghapi.core import GhApi
@@ -17,14 +17,14 @@ logger: Logger = logging.getLogger(__name__)
 
 
 class Scraper:
-    MIN_PAGE_SIZE: Final[int] = 1
-    MAX_PAGE_SIZE: Final[int] = 100
-    DEFAULT_USER_PAGE_SIZE: Final[int] = 50
-    DEFAULT_REPOSITORY_PAGE_SIZE: Final[int] = 30
-    DEFAULT_NUMBER_OF_REPOSITORIES: Final[int] = 0
-    DEFAULT_NUMBER_OF_USERS: Final[int] = 0
-    NO_REPOSITORIES: Final[int] = 0
-    NO_USERS: Final[int] = 0
+    MIN_PAGE_SIZE: int = 1
+    MAX_PAGE_SIZE: int = 100
+    DEFAULT_USER_PAGE_SIZE: int = 50
+    DEFAULT_REPOSITORY_PAGE_SIZE: int = 30
+    DEFAULT_NUMBER_OF_REPOSITORIES: int = 0
+    DEFAULT_NUMBER_OF_USERS: int = 0
+    NO_REPOSITORIES: int = 0
+    NO_USERS: int = 0
 
     def __init__(self, *, token: Optional[str] = None,
                  users_page_size: int = DEFAULT_USER_PAGE_SIZE,
