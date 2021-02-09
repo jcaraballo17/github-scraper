@@ -86,7 +86,26 @@ python manage.py runserver
 ##### Running the API on an external server
 Configuring a web server is out of the scope of this project, but I recommend following [this guide](https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu-18-04) on how to set up a project using `nginx` and `gunicorn` to serve a django project in Ubuntu.
 
-After starting the server, you can navigate to http://127.0.0.1:8000 on a web browser and see the available API endpoints.
+
+#### API endpoints
+After starting the server, you can navigate to http://127.0.0.1:8000 on a web browser and see these available API endpoints.
+```
+/users/
+/users/?since=<id>
+/users/<login>/
+/users/<login>/repos/
+
+/repos/
+/repos/<owner>/<name>
+```
+
+* `/users/` - shows a list of all users.
+* `/users/?since=<id>` - shows a list of users with id greater than <id>.
+* `/users/<login>/` - shows the details of the user with username <login>.
+* `/users/<login>/repos/` - shows a list of repositories by the user with username <login>.
+* `/repos/` - shows a list of all repositories.
+* `/repos/<owner>/<name>/` - shows the details of the repository of user with username <owner> and repository name <name> (the repository full name).
+
 
 #### Using the `scrape_git` command
 
